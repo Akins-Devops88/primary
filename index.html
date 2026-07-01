@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="BrightPath - Primary School Management System"/>
+<meta name="theme-color" content="#1B6CA8"/>
+<title>BrightPath - Primary School Management</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1B6CA8;--blue-dark:#134F7A;--blue-light:#E8F2FB;
+  --green:#16A34A;--green-light:#DCFCE7;
+  --amber:#D97706;--amber-light:#FEF3C7;
+  --red:#DC2626;--red-light:#FEF2F2;
+  --purple:#7C3AED;--purple-light:#EDE9FE;
+  --orange:#EA580C;--orange-light:#FFF7ED;
+  --slate-50:#F8FAFC;--slate-100:#F1F5F9;--slate-200:#E2E8F0;
+  --slate-400:#94A3B8;--slate-500:#64748B;--slate-700:#334155;
+  --text:#1E293B;--white:#fff;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.1);--shadow-md:0 4px 16px rgba(0,0,0,.12);
+}
+body{font-family:'Segoe UI',Arial,sans-serif;color:var(--text);background:var(--slate-50);min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+.hidden{display:none!important}
+
+/* ── AUTH ── */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--blue-dark) 0%,var(--blue) 60%,#3B9EE0 100%);padding:20px}
+.auth-card{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo-icon{font-size:3rem;display:block;margin-bottom:6px}
+.auth-logo-name{font-size:1.5rem;font-weight:800;color:var(--blue)}
+.auth-logo-sub{font-size:.83rem;color:var(--slate-500)}
+.auth-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.auth-desc{font-size:.85rem;color:var(--slate-500);margin-bottom:20px}
+.auth-hint{background:var(--blue-light);border-radius:var(--radius-sm);padding:10px 13px;
+  font-size:.82rem;color:var(--blue-dark);margin-bottom:18px;border-left:3px solid var(--blue)}
+.af{margin-bottom:14px}
+.af label{display:block;font-size:.82rem;font-weight:600;color:var(--slate-700);margin-bottom:5px}
+.af input,.af select{width:100%;padding:10px 13px;border:1.5px solid var(--slate-200);
+  border-radius:var(--radius-sm);font-size:.93rem;color:var(--text);transition:.15s}
+.af input:focus,.af select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,108,168,.13)}
+.af-pw{position:relative}
+.af-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;
+  color:var(--slate-400);cursor:pointer;font-size:.9rem}
+.auth-btn{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;
+  border-radius:var(--radius-sm);font-size:1rem;font-weight:700;cursor:pointer;transition:.18s;margin-top:4px}
+.auth-btn:hover{background:var(--blue-dark);box-shadow:var(--shadow-md)}
+.auth-link{background:none;border:none;color:var(--blue);font-size:.85rem;font-weight:600;
+  cursor:pointer;text-decoration:underline;text-underline-offset:2px;padding:0}
+.auth-err{background:var(--red-light);color:var(--red);border-radius:var(--radius-sm);
+  padding:9px 12px;font-size:.83rem;font-weight:600;margin-bottom:14px}
+.auth-ok{background:var(--green-light);color:var(--green);border-radius:var(--radius-sm);
+  padding:9px 12px;font-size:.83rem;font-weight:600;margin-bottom:14px}
+.pw-bar{height:4px;border-radius:2px;margin-top:5px;transition:.3s;background:var(--slate-200)}
+.pw-lbl{font-size:.74rem;color:var(--slate-400);margin-top:3px}
+
+/* ── SHELL ── */
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--blue);color:#fff;height:56px;padding:0 18px;display:flex;
+  align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.tb-brand{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.tb-brand-icon{font-size:1.4rem}
+.tb-user{display:flex;align-items:center;gap:8px;cursor:pointer;
+  background:rgba(255,255,255,.12);border-radius:20px;padding:5px 12px 5px 6px;transition:.15s}
+.tb-user:hover{background:rgba(255,255,255,.2)}
+.tb-avatar{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
+.tb-uname{font-size:.82rem;color:rgba(255,255,255,.9)}
+.tb-signout{font-size:.72rem;color:rgba(255,255,255,.5);margin-left:2px}
+
+/* bottom nav for mobile */
+.nav-bottom{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);
+  border-top:1px solid var(--slate-200);z-index:90;height:60px;padding-bottom:env(safe-area-inset-bottom)}
+.nav-bottom-inner{display:flex;height:100%}
+.nb-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;background:none;border:none;color:var(--slate-400);font-size:.65rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.04em;transition:.15s;padding:6px 0}
+.nb-btn.active{color:var(--blue)}
+.nb-icon{font-size:1.3rem}
+
+/* side nav for desktop */
+.layout{display:flex;flex:1}
+.sidebar{width:220px;background:var(--white);border-right:1px solid var(--slate-200);
+  padding:16px 10px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.sb-section{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--slate-400);padding:10px 10px 5px;margin-top:10px}
+.sb-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;border-radius:var(--radius-sm);
+  border:none;background:transparent;text-align:left;font-size:.87rem;font-weight:500;
+  color:var(--slate-700);cursor:pointer;transition:.15s}
+.sb-btn:hover{background:var(--slate-100)}
+.sb-btn.active{background:var(--blue-light);color:var(--blue);font-weight:700}
+.sb-icon{font-size:1.1rem;flex-shrink:0}
+.content{flex:1;padding:20px;overflow-y:auto;min-width:0}
+
+/* ── COMPONENTS ── */
+.page-title{font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:14px}
+.card-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;
+  display:flex;flex-direction:column;gap:4px;border-left:4px solid var(--blue)}
+.stat.green{border-left-color:var(--green)}
+.stat.amber{border-left-color:var(--amber)}
+.stat.purple{border-left-color:var(--purple)}
+.stat.orange{border-left-color:var(--orange)}
+.stat-num{font-size:1.8rem;font-weight:800;color:var(--text);line-height:1}
+.stat-label{font-size:.73rem;color:var(--slate-500);text-transform:uppercase;letter-spacing:.05em}
+.stat-icon{font-size:1.3rem;margin-bottom:2px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:var(--radius-sm);
+  font-weight:600;font-size:.87rem;border:none;cursor:pointer;transition:.18s;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark);transform:translateY(-1px)}
+.btn-ghost{background:var(--slate-100);color:var(--slate-700)}
+.btn-ghost:hover{background:var(--slate-200)}
+.btn-danger{background:var(--red-light);color:var(--red)}
+.btn-success{background:var(--green-light);color:var(--green)}
+.btn-sm{padding:5px 10px;font-size:.78rem}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.sb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.sb input,.sb select{padding:8px 11px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:.87rem}
+.sb input:focus,.sb select:focus{outline:none;border-color:var(--blue)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.87rem}
+th{padding:10px 12px;text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--slate-500);border-bottom:2px solid var(--slate-200);background:var(--slate-50)}
+td{padding:10px 12px;border-bottom:1px solid var(--slate-100);vertical-align:middle}
+tr:last-child td{border:none}
+tr:hover td{background:var(--slate-50)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--blue-light);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:var(--blue);flex-shrink:0}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:.73rem;font-weight:600}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+.badge-purple{background:var(--purple-light);color:var(--purple)}
+.empty{text-align:center;padding:40px 20px;color:var(--slate-400)}
+.empty-icon{font-size:2.5rem;margin-bottom:8px}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--slate-700);margin-bottom:4px}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:.9rem}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--blue)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.inline-msg{border-radius:var(--radius-sm);padding:9px 12px;font-size:.83rem;font-weight:600;margin-bottom:12px}
+.inline-msg.ok{background:var(--green-light);color:var(--green)}
+.inline-msg.err{background:var(--red-light);color:var(--red)}
+.inline-msg.info{background:var(--blue-light);color:var(--blue)}
+.panel{background:var(--blue-light);border:1.5px solid rgba(27,108,168,.2);
+  border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.panel-title{font-weight:700;font-size:.95rem;color:var(--blue-dark);
+  margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.toast{position:fixed;bottom:80px;right:20px;background:var(--text);color:#fff;border-radius:var(--radius-sm);
+  padding:12px 18px;font-size:.85rem;font-weight:500;box-shadow:var(--shadow-md);z-index:500;
+  max-width:300px;transition:opacity .25s,transform .25s}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+.toast.hidden{opacity:0;transform:translateY(10px);pointer-events:none}
+/* skill rating */
+.skill-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--slate-100)}
+.skill-row:last-child{border:none}
+.skill-name{flex:1;font-size:.85rem;color:var(--slate-700)}
+.skill-dots{display:flex;gap:4px}
+.skill-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--slate-200);cursor:pointer;transition:.15s}
+.skill-dot.filled{background:var(--blue);border-color:var(--blue)}
+/* attendance grid */
+.att-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:4px;margin-top:8px}
+.att-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:600;cursor:pointer;transition:.15s;border:1.5px solid transparent}
+.att-cell.P{background:var(--green-light);color:var(--green);border-color:rgba(22,163,74,.3)}
+.att-cell.A{background:var(--red-light);color:var(--red);border-color:rgba(220,38,38,.3)}
+.att-cell.L{background:var(--amber-light);color:var(--amber);border-color:rgba(217,119,6,.3)}
+.att-cell.E{background:var(--purple-light);color:var(--purple);border-color:rgba(124,58,237,.3)}
+.att-cell.none{background:var(--slate-100);color:var(--slate-400);border-color:var(--slate-200)}
+/* report card */
+.report-card{background:linear-gradient(135deg,#1B6CA8 0%,#2580CC 100%);color:#fff;
+  border-radius:16px;padding:24px;margin-bottom:16px}
+.rc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.rc-school{font-size:1rem;font-weight:700;opacity:.9}
+.rc-term{font-size:.82rem;opacity:.7}
+.rc-student{text-align:right}
+.rc-name{font-size:1.1rem;font-weight:800}
+.rc-class{font-size:.85rem;opacity:.8}
+.rc-subjects{background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden}
+.rc-row{display:grid;grid-template-columns:1fr 70px 70px 70px 80px;gap:0;
+  padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.1);font-size:.85rem}
+.rc-row:last-child{border:none}
+.rc-row.header{font-weight:700;opacity:.75;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.rc-grade{text-align:center;font-weight:700}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .nav-bottom{display:block}
+  .content{padding:12px;padding-bottom:70px}
+  .form-row{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .rc-row{grid-template-columns:1fr 55px 55px 55px 65px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH ══════════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="auth-logo-icon">🏫</span>
+      <div class="auth-logo-name">BrightPath</div>
+      <div class="auth-logo-sub">Primary School Management System</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="auth-login">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-desc">Sign in to your school account</div>
+      <div class="auth-hint">Demo: <strong>admin</strong> / <strong>School@123</strong></div>
+      <div id="login-err" class="auth-err hidden"></div>
+      <div class="af"><label>Username</label><input id="l-user" placeholder="Enter username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="af"><label>Password</label>
+        <div class="af-pw"><input id="l-pass" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="af-eye" onclick="togglePw('l-pass',this)">👁</button></div></div>
+      <div style="text-align:right;margin-bottom:14px"><button class="auth-link" onclick="showAuth('forgot')">Forgot password?</button></div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <!-- FORGOT -->
+    <div id="auth-forgot" class="hidden">
+      <div class="auth-title">Reset password</div>
+      <div class="auth-desc">Enter your username and we'll send a reset link to your email.</div>
+      <div id="forgot-msg" class="auth-ok hidden"></div>
+      <div id="forgot-err" class="auth-err hidden"></div>
+      <div class="af"><label>Username</label><input id="f-user" placeholder="Enter your username" onkeydown="if(event.key==='Enter')doForgot()"></div>
+      <button class="auth-btn" id="forgot-btn" onclick="doForgot()">Send Reset Link</button>
+      <div style="text-align:center;margin-top:14px"><button class="auth-link" onclick="showAuth('login')">← Back to Sign In</button></div>
+    </div>
+
+    <!-- RESET -->
+    <div id="auth-reset" class="hidden">
+      <div class="auth-title">Set new password</div>
+      <div class="auth-desc">Choose a strong password for your account.</div>
+      <div id="reset-err" class="auth-err hidden"></div>
+      <div class="af"><label>New Password</label>
+        <div class="af-pw"><input id="r-pw1" type="password" placeholder="Min 8 characters" oninput="pwStrength()">
+        <button class="af-eye" onclick="togglePw('r-pw1',this)">👁</button></div>
+        <div class="pw-bar" id="pw-bar"></div><div class="pw-lbl" id="pw-lbl"></div>
+      </div>
+      <div class="af"><label>Confirm Password</label>
+        <input id="r-pw2" type="password" placeholder="Repeat password" onkeydown="if(event.key==='Enter')doReset()"></div>
+      <button class="auth-btn" onclick="doReset()">Update Password</button>
+      <div style="text-align:center;margin-top:14px"><button class="auth-link" onclick="showAuth('login')">← Back to Sign In</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP SHELL ══════════════════════════════════════════════════ -->
+<div class="app hidden" id="app">
+  <header class="topbar">
+    <div class="tb-brand"><span class="tb-brand-icon">🏫</span>BrightPath</div>
+    <div class="tb-user" onclick="doLogout()">
+      <div class="tb-avatar" id="tb-av">A</div>
+      <span class="tb-uname" id="tb-name">Admin</span>
+      <span class="tb-signout">· Sign out</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sb-section">Main</div>
+      <button class="sb-btn active" onclick="showView('dashboard')"><span class="sb-icon">📊</span>Dashboard</button>
+      <button class="sb-btn" onclick="showView('pupils')"><span class="sb-icon">👦</span>Pupils</button>
+      <button class="sb-btn" onclick="showView('classes')"><span class="sb-icon">🏛️</span>Classes</button>
+      <button class="sb-btn" onclick="showView('attendance')"><span class="sb-icon">✅</span>Attendance</button>
+      <div class="sb-section">Academic</div>
+      <button class="sb-btn" onclick="showView('grades')"><span class="sb-icon">📝</span>Grades & Skills</button>
+      <button class="sb-btn" onclick="showView('reports')"><span class="sb-icon">📄</span>Report Cards</button>
+      <button class="sb-btn" onclick="showView('timetable')"><span class="sb-icon">🗓️</span>Timetable</button>
+      <div class="sb-section">Admin</div>
+      <button class="sb-btn" onclick="showView('teachers')"><span class="sb-icon">👩‍🏫</span>Teachers</button>
+      <button class="sb-btn" onclick="showView('parents')"><span class="sb-icon">👨‍👩‍👧</span>Parents</button>
+      <button class="sb-btn" onclick="showView('fees')"><span class="sb-icon">💳</span>Fees</button>
+      <button class="sb-btn" onclick="showView('settings')"><span class="sb-icon">⚙️</span>Settings</button>
+    </nav>
+
+    <main class="content" id="content"><!-- views injected here --></main>
+  </div>
+
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="nav-bottom">
+    <div class="nav-bottom-inner">
+      <button class="nb-btn active" onclick="showView('dashboard')"><span class="nb-icon">📊</span>Home</button>
+      <button class="nb-btn" onclick="showView('pupils')"><span class="nb-icon">👦</span>Pupils</button>
+      <button class="nb-btn" onclick="showView('attendance')"><span class="nb-icon">✅</span>Attend.</button>
+      <button class="nb-btn" onclick="showView('grades')"><span class="nb-icon">📝</span>Grades</button>
+      <button class="nb-btn" onclick="showView('fees')"><span class="nb-icon">💳</span>Fees</button>
+    </div>
+  </nav>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════ */
+const CREDS={username:'admin',password:'School@123',email:'admin@brightpath.edu'};
+let currentUser=null;
+
+function showAuth(s){
+  ['login','forgot','reset'].forEach(x=>document.getElementById('auth-'+x).classList.add('hidden'));
+  document.getElementById('auth-'+s).classList.remove('hidden');
+  ['login-err','forgot-msg','forgot-err','reset-err'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('hidden');});
+}
+function togglePw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
+function doLogin(){
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pass').value;
+  const err=document.getElementById('login-err');
+  err.classList.add('hidden');
+  if(!u||!p){err.textContent='Please enter username and password.';err.classList.remove('hidden');return;}
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.textContent='Signing in…';
+  setTimeout(()=>{
+    if(u===CREDS.username&&p===CREDS.password){
+      currentUser=CREDS;
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('tb-av').textContent=CREDS.username[0].toUpperCase();
+      document.getElementById('tb-name').textContent='Admin';
+      showView('dashboard');toast('Welcome to BrightPath! 🏫','success');
+    }else{err.textContent='Incorrect username or password.';err.classList.remove('hidden');document.getElementById('l-pass').value='';}
+    btn.disabled=false;btn.textContent='Sign In';
+  },600);
+}
+function doForgot(){
+  const u=document.getElementById('f-user').value.trim();
+  const err=document.getElementById('forgot-err'),ok=document.getElementById('forgot-msg');
+  err.classList.add('hidden');ok.classList.add('hidden');
+  if(!u){err.textContent='Please enter your username.';err.classList.remove('hidden');return;}
+  const btn=document.getElementById('forgot-btn');btn.disabled=true;btn.textContent='Sending…';
+  setTimeout(()=>{
+    if(u===CREDS.username){ok.textContent=`Reset link sent to ${CREDS.email}`;ok.classList.remove('hidden');setTimeout(()=>showAuth('reset'),2000);}
+    else{err.textContent='No account found with that username.';err.classList.remove('hidden');}
+    btn.disabled=false;btn.textContent='Send Reset Link';
+  },800);
+}
+function pwStrength(){
+  const pw=document.getElementById('r-pw1').value;
+  const bar=document.getElementById('pw-bar'),lbl=document.getElementById('pw-lbl');
+  if(!pw){bar.style.cssText='';lbl.textContent='';return;}
+  let s=0;if(pw.length>=8)s++;if(pw.length>=12)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+  const cols=['','#DC2626','#D97706','#D97706','#16A34A','#059669'];
+  const labs=['','Weak','Fair','Good','Strong','Very Strong'];
+  bar.style.cssText=`background:${cols[s]||'#E2E8F0'};height:4px;border-radius:2px;width:${s*20}%;margin-top:5px;transition:.3s`;
+  lbl.textContent=labs[s]||'';lbl.style.color=cols[s]||'#94A3B8';
+}
+function doReset(){
+  const p1=document.getElementById('r-pw1').value,p2=document.getElementById('r-pw2').value;
+  const err=document.getElementById('reset-err');err.classList.add('hidden');
+  if(p1.length<8){err.textContent='Password must be at least 8 characters.';err.classList.remove('hidden');return;}
+  if(p1!==p2){err.textContent='Passwords do not match.';err.classList.remove('hidden');return;}
+  CREDS.password=p1;showAuth('login');toast('Password updated — please sign in','success');
+}
+function doLogout(){currentUser=null;document.getElementById('app').classList.add('hidden');document.getElementById('auth-screen').classList.remove('hidden');showAuth('login');}
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+const STATE={
+  school:{name:'BrightPath Primary School',term:'Term 2, 2025/2026',motto:'Learning Together, Growing Together'},
+  classes:['Nursery','KG1','KG2','Primary 1','Primary 2','Primary 3','Primary 4','Primary 5','Primary 6'],
+  subjects:['English','Mathematics','Science','Social Studies','Phonics','Art & Craft','Physical Education','Moral Education'],
+  teachers:[
+    {id:'t1',name:'Mrs. Sarah Johnson',class:'Primary 4',subjects:['English','Phonics'],phone:'080-1111-0001',email:'sarah@brightpath.edu'},
+    {id:'t2',name:'Mr. Emeka Nwosu',  class:'Primary 5',subjects:['Mathematics','Science'],phone:'080-1111-0002',email:'emeka@brightpath.edu'},
+    {id:'t3',name:'Mrs. Adaeze Obi',  class:'Primary 3',subjects:['Social Studies','Art & Craft'],phone:'080-1111-0003',email:'adaeze@brightpath.edu'},
+    {id:'t4',name:'Mr. Chukwu Eze',   class:'Primary 6',subjects:['Mathematics','Physical Education'],phone:'080-1111-0004',email:'chukwu@brightpath.edu'},
+    {id:'t5',name:'Mrs. Fatima Bello', class:'KG1',subjects:['Phonics','Art & Craft'],phone:'080-1111-0005',email:'fatima@brightpath.edu'},
+  ],
+  pupils:[
+    {id:'p1',name:'Amara Okafor',  cls:'Primary 4',gender:'F',dob:'2014-03-12',guardian:'Mrs. Okafor',phone:'080-2222-0001',fees:'paid'},
+    {id:'p2',name:'Chidi Nwachukwu',cls:'Primary 4',gender:'M',dob:'2014-07-20',guardian:'Mr. Nwachukwu',phone:'080-2222-0002',fees:'paid'},
+    {id:'p3',name:'Blessing Adeyemi',cls:'Primary 5',gender:'F',dob:'2013-11-05',guardian:'Mrs. Adeyemi',phone:'080-2222-0003',fees:'owing'},
+    {id:'p4',name:'Emmanuel Eze',  cls:'Primary 5',gender:'M',dob:'2013-04-18',guardian:'Mr. Eze',phone:'080-2222-0004',fees:'paid'},
+    {id:'p5',name:'Grace Abiodun',  cls:'Primary 3',gender:'F',dob:'2015-08-30',guardian:'Mrs. Abiodun',phone:'080-2222-0005',fees:'partial'},
+    {id:'p6',name:'Samuel Okeke',   cls:'Primary 6',gender:'M',dob:'2012-01-25',guardian:'Mr. Okeke',phone:'080-2222-0006',fees:'paid'},
+    {id:'p7',name:'Zainab Musa',    cls:'KG1',gender:'F',dob:'2018-06-14',guardian:'Mr. Musa',phone:'080-2222-0007',fees:'paid'},
+    {id:'p8',name:'Daniel Adeyinka',cls:'Primary 3',gender:'M',dob:'2015-09-02',guardian:'Mrs. Adeyinka',phone:'080-2222-0008',fees:'owing'},
+  ],
+  grades:{
+    'p1':{'English':85,'Mathematics':78,'Science':90,'Social Studies':82,'Phonics':88,'Art & Craft':92,'Physical Education':95,'Moral Education':88},
+    'p2':{'English':72,'Mathematics':88,'Science':75,'Social Studies':68,'Phonics':70,'Art & Craft':65,'Physical Education':88,'Moral Education':75},
+    'p3':{'English':91,'Mathematics':87,'Science':93,'Social Studies':89,'Phonics':95,'Art & Craft':88,'Physical Education':90,'Moral Education':94},
+    'p4':{'English':78,'Mathematics':95,'Science':88,'Social Studies':75,'Phonics':72,'Art & Craft':70,'Physical Education':85,'Moral Education':80},
+  },
+  skills:{
+    'p1':{'Reading':4,'Writing':3,'Numeracy':4,'Social Skills':5,'Creativity':5,'Physical Dev.':4,'Responsibility':4,'Communication':5},
+    'p2':{'Reading':3,'Writing':3,'Numeracy':5,'Social Skills':3,'Creativity':2,'Physical Dev.':4,'Responsibility':4,'Communication':3},
+  },
+  attendance:{},
+  fees:{
+    'p1':{total:150000,paid:150000,balance:0},
+    'p2':{total:150000,paid:150000,balance:0},
+    'p3':{total:150000,paid:50000,balance:100000},
+    'p4':{total:150000,paid:150000,balance:0},
+    'p5':{total:150000,paid:80000,balance:70000},
+    'p6':{total:150000,paid:150000,balance:0},
+    'p7':{total:120000,paid:120000,balance:0},
+    'p8':{total:150000,paid:0,balance:150000},
+  },
+  timetable:{
+    Monday:   ['English','Mathematics','Science','Break','Social Studies','Art & Craft'],
+    Tuesday:  ['Mathematics','English','Phonics','Break','Physical Education','Moral Education'],
+    Wednesday:['Science','Social Studies','English','Break','Mathematics','Art & Craft'],
+    Thursday: ['Phonics','Mathematics','Science','Break','English','Physical Education'],
+    Friday:   ['English','Art & Craft','Mathematics','Break','Assembly','Moral Education'],
+  },
+  addPanelOpen:false,
+};
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+let toastT;
+function toast(msg,type='info'){
+  clearTimeout(toastT);
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`toast ${type}`;
+  el.classList.remove('hidden');
+  toastT=setTimeout(()=>el.classList.add('hidden'),4000);
+}
+
+/* ═══════════════════════════════════════════
+   VIEWS
+═══════════════════════════════════════════ */
+const VIEWS=['dashboard','pupils','classes','attendance','grades','reports','timetable','teachers','parents','fees','settings'];
+function showView(name){
+  document.querySelectorAll('.sb-btn,.nb-btn').forEach(b=>{
+    const map={'dashboard':['dashboard'],'pupils':['pupils'],'classes':['classes'],
+      'attendance':['attendance'],'grades':['grades','reports'],'reports':['grades','reports'],
+      'timetable':['timetable'],'teachers':['teachers'],'parents':['parents'],'fees':['fees'],'settings':['settings']};
+    const targets=map[name]||[name];
+    b.classList.toggle('active',targets.some(t=>b.textContent.trim().toLowerCase().includes(t.slice(0,5).toLowerCase())));
+  });
+  // re-set active correctly
+  document.querySelectorAll('.sb-btn,.nb-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sb-btn,.nb-btn').forEach(b=>{
+    if(b.getAttribute('onclick')===`showView('${name}')`) b.classList.add('active');
+  });
+  const c=document.getElementById('content');
+  if(name==='dashboard')   c.innerHTML=vDashboard();
+  else if(name==='pupils') c.innerHTML=vPupils();
+  else if(name==='classes')c.innerHTML=vClasses();
+  else if(name==='attendance')c.innerHTML=vAttendance();
+  else if(name==='grades') c.innerHTML=vGrades();
+  else if(name==='reports')c.innerHTML=vReports();
+  else if(name==='timetable')c.innerHTML=vTimetable();
+  else if(name==='teachers')c.innerHTML=vTeachers();
+  else if(name==='parents')c.innerHTML=vParents();
+  else if(name==='fees')   c.innerHTML=vFees();
+  else if(name==='settings')c.innerHTML=vSettings();
+}
+
+/* ─── helpers ─── */
+const ini=(n)=>n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const fmt=(n)=>Number(n).toLocaleString('en-NG');
+const letterGrade=(s)=>s>=80?'A':s>=70?'B':s>=60?'C':s>=50?'D':'F';
+const gradeColor=(s)=>s>=80?'badge-green':s>=70?'badge-blue':s>=60?'badge-amber':'badge-red';
+
+/* ─── DASHBOARD ─── */
+function vDashboard(){
+  const totalPupils=STATE.pupils.length;
+  const totalTeachers=STATE.teachers.length;
+  const feesOwing=STATE.pupils.filter(p=>STATE.fees[p.id]?.balance>0).length;
+  const attendance=Math.round((STATE.pupils.length-feesOwing)/STATE.pupils.length*100);
+  return `<div class="page-title">📊 Dashboard</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-icon">👦</div><div class="stat-num">${totalPupils}</div><div class="stat-label">Total Pupils</div></div>
+    <div class="stat green"><div class="stat-icon">👩‍🏫</div><div class="stat-num">${totalTeachers}</div><div class="stat-label">Teachers</div></div>
+    <div class="stat amber"><div class="stat-icon">💳</div><div class="stat-num">${feesOwing}</div><div class="stat-label">Fees Owing</div></div>
+    <div class="stat purple"><div class="stat-icon">🏛️</div><div class="stat-num">${STATE.classes.length}</div><div class="stat-label">Classes</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="card">
+      <div class="card-title">👦 Recent Pupils</div>
+      ${STATE.pupils.slice(0,5).map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--slate-100)">
+        <div class="av">${ini(p.name)}</div>
+        <div><div style="font-weight:600;font-size:.87rem">${p.name}</div>
+        <div style="font-size:.75rem;color:var(--slate-400)">${p.cls}</div></div>
+        <span class="badge ${p.fees==='paid'?'badge-green':p.fees==='partial'?'badge-amber':'badge-red'}" style="margin-left:auto">${p.fees}</span>
+      </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">🗓️ Today's Timetable — Primary 4</div>
+      ${(STATE.timetable[['Monday','Tuesday','Wednesday','Thursday','Friday'][new Date().getDay()-1]]||STATE.timetable.Monday).map((s,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--slate-100)">
+        <span style="font-size:.75rem;color:var(--slate-400);min-width:50px">${['8:00','9:00','10:00','11:00','12:00','13:00'][i]}</span>
+        <span style="font-size:.85rem;font-weight:${s==='Break'?'600':'500'};color:${s==='Break'?'var(--amber)':'var(--text)'}">${s}</span>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📢 School Notice Board</div>
+    <div style="background:var(--amber-light);border-left:3px solid var(--amber);padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:8px">
+      <div style="font-weight:700;font-size:.87rem">📌 End of Term Exams</div>
+      <div style="font-size:.82rem;color:var(--slate-500);margin-top:2px">Term 2 examinations begin ${new Date(Date.now()+14*86400000).toDateString()}. All teachers should submit their question papers by next Friday.</div>
+    </div>
+    <div style="background:var(--green-light);border-left:3px solid var(--green);padding:10px 14px;border-radius:var(--radius-sm)">
+      <div style="font-weight:700;font-size:.87rem">✅ PTA Meeting Scheduled</div>
+      <div style="font-size:.82rem;color:var(--slate-500);margin-top:2px">Parents-Teachers Association meeting is scheduled for ${new Date(Date.now()+7*86400000).toDateString()} at 10:00 AM in the school hall.</div>
+    </div>
+  </div>`;
+}
+
+/* ─── PUPILS ─── */
+function vPupils(){
+  const q=(document.getElementById('pupil-q')?.value||'').toLowerCase();
+  const cls=document.getElementById('pupil-cls')?.value||'';
+  let rows=STATE.pupils.filter(p=>{
+    const mq=!q||`${p.name} ${p.cls}`.toLowerCase().includes(q);
+    const mc=!cls||p.cls===cls;
+    return mq&&mc;
+  });
+  return `<div class="hdr"><div class="page-title" style="margin:0">👦 Pupils</div>
+    <button class="btn btn-primary" onclick="toggleAddPupil()">+ Add Pupil</button></div>
+  <div id="add-pupil-panel" class="${STATE.addPanelOpen?'panel':'hidden'}">
+    <div class="panel-title"><span>Add New Pupil</span><button class="btn btn-ghost btn-sm" onclick="toggleAddPupil()">✕ Close</button></div>
+    <div id="ap-msg" class="inline-msg hidden"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Full Name *</label><input id="ap-name" placeholder="Pupil's full name"></div>
+      <div class="form-group"><label>Class *</label><select id="ap-cls">${STATE.classes.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Gender *</label><select id="ap-gender"><option value="M">Male</option><option value="F">Female</option></select></div>
+      <div class="form-group"><label>Date of Birth</label><input id="ap-dob" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Guardian Name *</label><input id="ap-guardian" placeholder="Parent/Guardian name"></div>
+      <div class="form-group"><label>Guardian Phone</label><input id="ap-phone" placeholder="080-XXXX-XXXX"></div>
+    </div>
+    <div class="form-actions"><button class="btn btn-ghost" onclick="toggleAddPupil()">Cancel</button>
+    <button class="btn btn-primary" onclick="addPupil()">✓ Add Pupil</button></div>
+  </div>
+  <div class="card">
+    <div class="sb">
+      <input id="pupil-q" placeholder="Search pupils…" oninput="showView('pupils')" style="flex:1;min-width:160px">
+      <select id="pupil-cls" onchange="showView('pupils')">
+        <option value="">All classes</option>${STATE.classes.map(c=>`<option>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>Name</th><th>Class</th><th>Gender</th><th>Guardian</th><th>Fees</th><th>Action</th></tr></thead>
+      <tbody>${rows.map(p=>`<tr>
+        <td><div class="av">${ini(p.name)}</div></td>
+        <td><div style="font-weight:600">${p.name}</div><div style="font-size:.75rem;color:var(--slate-400)">${p.dob}</div></td>
+        <td>${p.cls}</td>
+        <td><span class="badge badge-blue">${p.gender==='M'?'Male':'Female'}</span></td>
+        <td><div style="font-size:.85rem">${p.guardian}</div><div style="font-size:.75rem;color:var(--slate-400)">${p.phone}</div></td>
+        <td><span class="badge ${p.fees==='paid'?'badge-green':p.fees==='partial'?'badge-amber':'badge-red'}">${p.fees}</span></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="viewPupilGrades('${p.id}')">📝 Grades</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <div style="padding:8px 0 0;font-size:.82rem;color:var(--slate-400)">${rows.length} pupil${rows.length!==1?'s':''}</div>
+  </div>`;
+}
+
+function toggleAddPupil(){STATE.addPanelOpen=!STATE.addPanelOpen;showView('pupils');}
+function addPupil(){
+  const name=document.getElementById('ap-name')?.value.trim();
+  const cls=document.getElementById('ap-cls')?.value;
+  const gender=document.getElementById('ap-gender')?.value;
+  const guardian=document.getElementById('ap-guardian')?.value.trim();
+  const msg=document.getElementById('ap-msg');
+  msg.classList.add('hidden');
+  if(!name||!guardian){msg.className='inline-msg err';msg.textContent='Name and guardian are required.';msg.classList.remove('hidden');return;}
+  const id='p'+Date.now();
+  STATE.pupils.push({id,name,cls,gender,dob:document.getElementById('ap-dob')?.value||'',guardian,phone:document.getElementById('ap-phone')?.value||'',fees:'owing'});
+  STATE.fees[id]={total:150000,paid:0,balance:150000};
+  STATE.addPanelOpen=false;
+  toast(`${name} added to ${cls}`,'success');showView('pupils');
+}
+
+function viewPupilGrades(pid){
+  const p=STATE.pupils.find(x=>x.id===pid);if(!p) return;
+  const g=STATE.grades[pid]||{};
+  const sk=STATE.skills[pid]||{};
+  document.getElementById('content').innerHTML=`
+  <button class="btn btn-ghost" style="margin-bottom:14px" onclick="showView('pupils')">← Back to Pupils</button>
+  <div class="page-title">📝 ${p.name} — ${p.cls}</div>
+  <div class="report-card">
+    <div class="rc-header">
+      <div><div class="rc-school">${STATE.school.name}</div><div class="rc-term">${STATE.school.term}</div></div>
+      <div class="rc-student"><div class="rc-name">${p.name}</div><div class="rc-class">${p.cls}</div></div>
+    </div>
+    <div class="rc-subjects">
+      <div class="rc-row header"><span>Subject</span><span class="rc-grade">Score</span><span class="rc-grade">Grade</span><span class="rc-grade">Remark</span><span class="rc-grade">%</span></div>
+      ${STATE.subjects.map(s=>{const sc=g[s]||0;return`<div class="rc-row">
+        <span>${s}</span><span class="rc-grade">${sc||'—'}</span>
+        <span class="rc-grade">${sc?letterGrade(sc):'—'}</span>
+        <span class="rc-grade" style="font-size:.78rem">${sc>=80?'Excellent':sc>=70?'Very Good':sc>=60?'Good':sc>=50?'Fair':sc?'Needs Imp.':'—'}</span>
+        <span class="rc-grade">${sc?sc+'%':'—'}</span>
+      </div>`}).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⭐ Skills Assessment (1-5)</div>
+    ${Object.entries(sk).map(([skill,val])=>`<div class="skill-row">
+      <div class="skill-name">${skill}</div>
+      <div class="skill-dots">${[1,2,3,4,5].map(d=>`<div class="skill-dot ${d<=val?'filled':''}" onclick="setSkill('${pid}','${skill}',${d})"></div>`).join('')}</div>
+      <div style="font-size:.8rem;color:var(--slate-400);min-width:20px;text-align:right">${val}/5</div>
+    </div>`).join('')}
+  </div>`;
+}
+function setSkill(pid,skill,val){if(!STATE.skills[pid])STATE.skills[pid]={};STATE.skills[pid][skill]=val;viewPupilGrades(pid);}
+
+/* ─── CLASSES ─── */
+function vClasses(){
+  return `<div class="page-title">🏛️ Classes</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+  ${STATE.classes.map(cls=>{
+    const pupils=STATE.pupils.filter(p=>p.cls===cls);
+    const teacher=STATE.teachers.find(t=>t.class===cls);
+    return`<div class="card" style="cursor:pointer" onclick="showClassDetail('${cls}')">
+      <div style="font-size:2rem;margin-bottom:6px">🏛️</div>
+      <div style="font-weight:700;font-size:1rem">${cls}</div>
+      <div style="font-size:.82rem;color:var(--slate-500);margin-top:2px">${pupils.length} pupil${pupils.length!==1?'s':''}</div>
+      <div style="font-size:.8rem;color:var(--slate-400);margin-top:4px">${teacher?'👩‍🏫 '+teacher.name:'No class teacher'}</div>
+    </div>`;
+  }).join('')}
+  </div>`;
+}
+function showClassDetail(cls){
+  const pupils=STATE.pupils.filter(p=>p.cls===cls);
+  const teacher=STATE.teachers.find(t=>t.class===cls);
+  document.getElementById('content').innerHTML=`
+  <button class="btn btn-ghost" style="margin-bottom:14px" onclick="showView('classes')">← Back to Classes</button>
+  <div class="page-title">🏛️ ${cls}</div>
+  <div class="card">
+    <div class="card-title">📋 Class Details</div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div><div style="font-size:.73rem;font-weight:700;text-transform:uppercase;color:var(--slate-400)">Class Teacher</div>
+      <div style="font-weight:600;margin-top:3px">${teacher?teacher.name:'Not assigned'}</div></div>
+      <div><div style="font-size:.73rem;font-weight:700;text-transform:uppercase;color:var(--slate-400)">Total Pupils</div>
+      <div style="font-weight:600;margin-top:3px">${pupils.length}</div></div>
+      <div><div style="font-size:.73rem;font-weight:700;text-transform:uppercase;color:var(--slate-400)">Boys</div>
+      <div style="font-weight:600;margin-top:3px">${pupils.filter(p=>p.gender==='M').length}</div></div>
+      <div><div style="font-size:.73rem;font-weight:700;text-transform:uppercase;color:var(--slate-400)">Girls</div>
+      <div style="font-weight:600;margin-top:3px">${pupils.filter(p=>p.gender==='F').length}</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">👦 Pupils in ${cls}</div>
+    ${pupils.length?`<div class="table-wrap"><table>
+      <thead><tr><th></th><th>Name</th><th>Gender</th><th>Fees</th></tr></thead>
+      <tbody>${pupils.map(p=>`<tr><td><div class="av">${ini(p.name)}</div></td>
+        <td><div style="font-weight:600">${p.name}</div></td>
+        <td>${p.gender==='M'?'Male':'Female'}</td>
+        <td><span class="badge ${p.fees==='paid'?'badge-green':p.fees==='partial'?'badge-amber':'badge-red'}">${p.fees}</span></td>
+      </tr>`).join('')}</tbody></table></div>`:
+      `<div class="empty"><div class="empty-icon">📭</div><div>No pupils in this class</div></div>`}
+  </div>`;
+}
+
+/* ─── ATTENDANCE ─── */
+function vAttendance(){
+  const today=new Date().toISOString().slice(0,10);
+  const cls=document.getElementById('att-cls')?.value||STATE.classes[3];
+  const date=document.getElementById('att-date')?.value||today;
+  const key=`${cls}|${date}`;
+  const pupils=STATE.pupils.filter(p=>p.cls===cls);
+  const statuses=['P','A','L','E'];
+  const labels={P:'Present',A:'Absent',L:'Late',E:'Excused'};
+  const colors={P:'badge-green',A:'badge-red',L:'badge-amber',E:'badge-purple'};
+  const summary=statuses.reduce((acc,s)=>{acc[s]=pupils.filter(p=>(STATE.attendance[`${key}|${p.id}`]||'none')===s).length;return acc;},{});
+  return `<div class="page-title">✅ Attendance Register</div>
+  <div class="card">
+    <div class="sb">
+      <select id="att-cls" onchange="showView('attendance')" style="min-width:130px">
+        ${STATE.classes.map(c=>`<option ${c===cls?'selected':''}>${c}</option>`).join('')}
+      </select>
+      <input id="att-date" type="date" value="${date}" onchange="showView('attendance')">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto">
+        ${statuses.map(s=>`<span class="badge ${colors[s]}">${s}: ${summary[s]}</span>`).join('')}
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>Name</th>${statuses.map(s=>`<th>${labels[s]}</th>`).join('')}<th>Status</th></tr></thead>
+      <tbody>${pupils.map(p=>{
+        const cur=STATE.attendance[`${key}|${p.id}`]||'none';
+        return`<tr>
+          <td><div class="av">${ini(p.name)}</div></td>
+          <td style="font-weight:600">${p.name}</td>
+          ${statuses.map(s=>`<td><input type="radio" name="att-${p.id}" value="${s}" ${cur===s?'checked':''} onchange="markAtt('${key}','${p.id}','${s}')"></td>`).join('')}
+          <td><span class="badge ${cur==='P'?'badge-green':cur==='A'?'badge-red':cur==='L'?'badge-amber':cur==='E'?'badge-purple':'badge-blue'}">${cur==='none'?'—':cur}</span></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>
+    <div class="form-actions" style="margin-top:10px">
+      <button class="btn btn-success" onclick="markAllPresent('${key}','${cls}')">✅ Mark All Present</button>
+      <button class="btn btn-primary" onclick="toast('Attendance saved for ${cls} on ${date}','success')">💾 Save Attendance</button>
+    </div>
+  </div>`;
+}
+function markAtt(key,pid,status){STATE.attendance[`${key}|${pid}`]=status;}
+function markAllPresent(key,cls){STATE.pupils.filter(p=>p.cls===cls).forEach(p=>{STATE.attendance[`${key}|${p.id}`]='P';});showView('attendance');toast('All marked Present','success');}
+
+/* ─── GRADES ─── */
+function vGrades(){
+  const sel=document.getElementById('gr-pupil')?.value||'p1';
+  const p=STATE.pupils.find(x=>x.id===sel)||STATE.pupils[0];
+  const g=STATE.grades[sel]||{};
+  return `<div class="page-title">📝 Grades & Assessment</div>
+  <div class="card">
+    <div class="sb">
+      <select id="gr-pupil" onchange="showView('grades')" style="min-width:200px">
+        ${STATE.pupils.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${p.name} (${p.cls})</option>`).join('')}
+      </select>
+    </div>
+    <div id="gr-msg" class="inline-msg hidden"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Subject</th><th>Score / 100</th><th>Grade</th><th>Remark</th></tr></thead>
+      <tbody>${STATE.subjects.map(s=>{const sc=g[s]||'';return`<tr>
+        <td style="font-weight:600">${s}</td>
+        <td><input type="number" min="0" max="100" value="${sc}" placeholder="—"
+          style="width:80px;padding:5px 8px;border:1.5px solid var(--slate-200);border-radius:6px;font-size:.88rem"
+          onchange="saveGrade('${sel}','${s}',this.value)"></td>
+        <td>${sc?`<span class="badge ${gradeColor(sc)}">${letterGrade(sc)}</span>`:'—'}</td>
+        <td style="font-size:.82rem;color:var(--slate-500)">${sc>=80?'Excellent':sc>=70?'Very Good':sc>=60?'Good':sc>=50?'Pass':sc?'Fail':'—'}</td>
+      </tr>`}).join('')}</tbody>
+    </table></div>
+    ${Object.keys(g).length?`<div style="margin-top:12px;padding:10px 12px;background:var(--blue-light);border-radius:var(--radius-sm);font-size:.85rem">
+      <strong>Average: ${Math.round(Object.values(g).reduce((a,b)=>a+b,0)/Object.values(g).length)}%</strong>
+      &nbsp;·&nbsp; Grade: <strong>${letterGrade(Math.round(Object.values(g).reduce((a,b)=>a+b,0)/Object.values(g).length))}</strong>
+      &nbsp;·&nbsp; Position: Computed at term end
+    </div>`:''}
+  </div>`;
+}
+function saveGrade(pid,subject,val){
+  if(!STATE.grades[pid])STATE.grades[pid]={};
+  STATE.grades[pid][subject]=parseInt(val)||0;
+  toast(`${subject} grade saved`,'success');showView('grades');
+}
+
+/* ─── REPORT CARDS ─── */
+function vReports(){
+  const sel=document.getElementById('rp-pupil')?.value||'p1';
+  const p=STATE.pupils.find(x=>x.id===sel)||STATE.pupils[0];
+  const g=STATE.grades[sel]||{};
+  const avg=Object.keys(g).length?Math.round(Object.values(g).reduce((a,b)=>a+b,0)/Object.values(g).length):0;
+  return `<div class="page-title">📄 Report Cards</div>
+  <div class="card">
+    <div class="sb">
+      <select id="rp-pupil" onchange="showView('reports')" style="min-width:200px">
+        ${STATE.pupils.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${x.name} (${x.cls})</option>`).join('')}
+      </select>
+      <button class="btn btn-primary" onclick="toast('Report card sent to ${p.guardian}','success')">📧 Email to Guardian</button>
+      <button class="btn btn-ghost" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
+  <div class="report-card">
+    <div class="rc-header">
+      <div><div class="rc-school">🏫 ${STATE.school.name}</div><div class="rc-term">${STATE.school.term}</div></div>
+      <div class="rc-student"><div class="rc-name">${p.name}</div><div class="rc-class">${p.cls} · ${p.gender==='M'?'Male':'Female'}</div></div>
+    </div>
+    <div class="rc-subjects">
+      <div class="rc-row header"><span>Subject</span><span class="rc-grade">Score</span><span class="rc-grade">Grade</span><span class="rc-grade">Remark</span><span class="rc-grade">%</span></div>
+      ${STATE.subjects.map(s=>{const sc=g[s]||0;return`<div class="rc-row">
+        <span>${s}</span><span class="rc-grade">${sc||'—'}</span>
+        <span class="rc-grade">${sc?letterGrade(sc):'—'}</span>
+        <span class="rc-grade" style="font-size:.78rem">${sc>=80?'Excellent':sc>=70?'Very Good':sc>=60?'Good':sc>=50?'Fair':sc?'Needs Imp.':'—'}</span>
+        <span class="rc-grade">${sc?sc+'%':'—'}</span>
+      </div>`}).join('')}
+    </div>
+    ${avg?`<div style="padding:12px 14px;border-top:1px solid rgba(255,255,255,.2);display:flex;justify-content:space-between;font-size:.88rem">
+      <span>Overall Average: <strong>${avg}%</strong></span>
+      <span>Overall Grade: <strong>${letterGrade(avg)}</strong></span>
+      <span>Remark: <strong>${avg>=70?'Promoted':'Borderline — Needs Improvement'}</strong></span>
+    </div>`:''}
+  </div>
+  <div class="card">
+    <div class="card-title">✍️ Class Teacher's Comment</div>
+    <textarea style="width:100%;padding:10px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:.88rem;resize:vertical;min-height:70px" placeholder="Enter teacher's comment for ${p.name}…">${avg>=80?`${p.name} is an excellent student who consistently performs above expectations. Promoted to next class with commendation.`:avg>=60?`${p.name} shows good academic progress this term. We encourage continued effort across all subjects.`:`${p.name} needs additional support in some subject areas. We recommend extra lessons and parental involvement.`}</textarea>
+    <div class="form-actions"><button class="btn btn-primary" onclick="toast('Comment saved','success')">💾 Save Comment</button></div>
+  </div>`;
+}
+
+/* ─── TIMETABLE ─── */
+function vTimetable(){
+  const days=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  const times=['8:00 – 9:00','9:00 – 10:00','10:00 – 11:00','11:00 – 11:30','11:30 – 12:30','12:30 – 1:30'];
+  const colors={'English':'badge-blue','Mathematics':'badge-purple','Science':'badge-green','Social Studies':'badge-amber','Phonics':'badge-blue','Art & Craft':'badge-red','Physical Education':'badge-green','Moral Education':'badge-amber','Break':'','Assembly':''};
+  return `<div class="page-title">🗓️ School Timetable — Primary 4</div>
+  <div class="card" style="overflow-x:auto">
+    <table style="min-width:600px">
+      <thead><tr><th>Time</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead>
+      <tbody>${times.map((t,i)=>`<tr>
+        <td style="font-size:.78rem;color:var(--slate-500);white-space:nowrap;font-weight:600">${t}</td>
+        ${days.map(d=>{const s=STATE.timetable[d][i];const c=colors[s]||'';return`<td><span class="${c?'badge '+c:''}" style="${s==='Break'?'font-weight:700;color:var(--amber)':s==='Assembly'?'font-weight:700;color:var(--purple)':''}">${s}</span></td>`;}).join('')}
+      </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+/* ─── TEACHERS ─── */
+function vTeachers(){
+  return `<div class="hdr"><div class="page-title" style="margin:0">👩‍🏫 Teachers</div>
+  <button class="btn btn-primary" onclick="toast('Add teacher form coming soon','info')">+ Add Teacher</button></div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th></th><th>Name</th><th>Class</th><th>Subjects</th><th>Contact</th></tr></thead>
+    <tbody>${STATE.teachers.map(t=>`<tr>
+      <td><div class="av">${ini(t.name)}</div></td>
+      <td><div style="font-weight:600">${t.name}</div><div style="font-size:.75rem;color:var(--slate-400)">${t.email}</div></td>
+      <td><span class="badge badge-blue">${t.class}</span></td>
+      <td>${t.subjects.map(s=>`<span class="badge badge-purple" style="margin-right:3px">${s}</span>`).join('')}</td>
+      <td style="font-size:.83rem">${t.phone}</td>
+    </tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+
+/* ─── PARENTS ─── */
+function vParents(){
+  return `<div class="page-title">👨‍👩‍👧 Parents & Guardians</div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Guardian</th><th>Child</th><th>Class</th><th>Phone</th><th>Fees Status</th><th>Action</th></tr></thead>
+    <tbody>${STATE.pupils.map(p=>`<tr>
+      <td><div style="font-weight:600">${p.guardian}</div></td>
+      <td><div class="av" style="display:inline-flex;margin-right:6px">${ini(p.name)}</div>${p.name}</td>
+      <td>${p.cls}</td><td style="font-size:.83rem">${p.phone}</td>
+      <td><span class="badge ${p.fees==='paid'?'badge-green':p.fees==='partial'?'badge-amber':'badge-red'}">${p.fees}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="toast('SMS sent to ${p.guardian}','success')">📱 SMS</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+
+/* ─── FEES ─── */
+function vFees(){
+  const totalBilled=STATE.pupils.reduce((a,p)=>a+(STATE.fees[p.id]?.total||0),0);
+  const totalPaid=STATE.pupils.reduce((a,p)=>a+(STATE.fees[p.id]?.paid||0),0);
+  const totalOwing=STATE.pupils.reduce((a,p)=>a+(STATE.fees[p.id]?.balance||0),0);
+  return `<div class="page-title">💳 Fees Management</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-icon">💰</div><div class="stat-num">₦${fmt(totalBilled)}</div><div class="stat-label">Total Billed</div></div>
+    <div class="stat green"><div class="stat-icon">✅</div><div class="stat-num">₦${fmt(totalPaid)}</div><div class="stat-label">Collected</div></div>
+    <div class="stat amber"><div class="stat-icon">⏳</div><div class="stat-num">₦${fmt(totalOwing)}</div><div class="stat-label">Outstanding</div></div>
+  </div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Pupil</th><th>Class</th><th>Term Fee</th><th>Paid</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>${STATE.pupils.map(p=>{const f=STATE.fees[p.id]||{};return`<tr>
+      <td><div style="font-weight:600">${p.name}</div></td>
+      <td>${p.cls}</td>
+      <td>₦${fmt(f.total||0)}</td>
+      <td>₦${fmt(f.paid||0)}</td>
+      <td style="font-weight:${f.balance>0?'700':'400'};color:${f.balance>0?'var(--red)':'var(--green)'}">₦${fmt(f.balance||0)}</td>
+      <td><span class="badge ${p.fees==='paid'?'badge-green':p.fees==='partial'?'badge-amber':'badge-red'}">${p.fees}</span></td>
+      <td><button class="btn btn-success btn-sm" onclick="recordPayment('${p.id}')">+ Payment</button></td>
+    </tr>`;}).join('')}</tbody>
+  </table></div></div>`;
+}
+function recordPayment(pid){
+  const p=STATE.pupils.find(x=>x.id===pid);
+  const f=STATE.fees[pid];if(!f||!p)return;
+  if(f.balance<=0){toast(`${p.name}'s fees are fully paid`,'info');return;}
+  const amt=50000; // default payment amount — inline input in production
+  if(!amt||amt<=0)return;
+  const pay=Math.min(amt,f.balance);
+  f.paid+=pay;f.balance-=pay;
+  p.fees=f.balance===0?'paid':f.paid>0?'partial':'owing';
+  toast(`₦${fmt(pay)} recorded for ${p.name}`,'success');showView('fees');
+}
+
+/* ─── SETTINGS ─── */
+function vSettings(){
+  return `<div class="page-title">⚙️ Settings</div>
+  <div class="card" style="max-width:540px">
+    <div class="card-title">🏫 School Information</div>
+    <div class="form-group"><label>School Name</label><input id="set-name" value="${STATE.school.name}"></div>
+    <div class="form-group"><label>Current Term</label><input id="set-term" value="${STATE.school.term}"></div>
+    <div class="form-group"><label>School Motto</label><input id="set-motto" value="${STATE.school.motto}"></div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button></div>
+  </div>
+  <div class="card" style="max-width:540px">
+    <div class="card-title">🔑 Change Admin Password</div>
+    <div id="pw-change-msg" class="inline-msg hidden"></div>
+    <div class="form-group"><label>Current Password</label><input id="sc-cur" type="password" placeholder="Current password"></div>
+    <div class="form-group"><label>New Password</label><input id="sc-new" type="password" placeholder="New password (min 8 chars)"></div>
+    <div class="form-group"><label>Confirm New Password</label><input id="sc-con" type="password" placeholder="Confirm new password"></div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="changePassword()">🔑 Update Password</button></div>
+  </div>`;
+}
+function saveSettings(){
+  STATE.school.name=document.getElementById('set-name')?.value||STATE.school.name;
+  STATE.school.term=document.getElementById('set-term')?.value||STATE.school.term;
+  STATE.school.motto=document.getElementById('set-motto')?.value||STATE.school.motto;
+  toast('Settings saved','success');
+}
+function changePassword(){
+  const cur=document.getElementById('sc-cur')?.value;
+  const nw=document.getElementById('sc-new')?.value;
+  const cn=document.getElementById('sc-con')?.value;
+  const msg=document.getElementById('pw-change-msg');
+  msg.classList.add('hidden');
+  if(cur!==CREDS.password){msg.className='inline-msg err';msg.textContent='Current password incorrect.';msg.classList.remove('hidden');return;}
+  if(nw.length<8){msg.className='inline-msg err';msg.textContent='Password must be 8+ characters.';msg.classList.remove('hidden');return;}
+  if(nw!==cn){msg.className='inline-msg err';msg.textContent='Passwords do not match.';msg.classList.remove('hidden');return;}
+  CREDS.password=nw;msg.className='inline-msg ok';msg.textContent='✅ Password updated successfully.';msg.classList.remove('hidden');
+  ['sc-cur','sc-new','sc-con'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+}
+</script>
+</body>
+</html>
